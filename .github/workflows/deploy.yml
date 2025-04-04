@@ -22,17 +22,22 @@ jobs:
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
       
       - name: Terraform Init
-        run: |
-          cd terraform
-          terraform init
+        working-directory: ./terraform
+        run: terraform init
       
       - name: Terraform Apply
+        working-directory: ./terraform
         run: |
-          cd terraform
           terraform apply -auto-approve
-          echo "EC2_IP=$(terraform output -raw web_ip)" >> $GITHUB_ENV
+          EC2_IP=$(terraform output -raw web_ip || echo "")
+          echo "EC2_IP=${EC2_IP}" >> $GITHUB_ENV
+      
+      - name: Debug EC2 IP
+        run: echo "EC2 IP is ${{ env.EC2_IP }}"
       
       - name: Wait for instance to be ready
         run: sleep 60
@@ -47,9 +52,15 @@ jobs:
       
       - name: Update Ansible inventory
         run: |
-          sed -i "s/YOUR_EC2_IP/${{ env.EC2_IP }}/g" ansible/inventory.ini
+          if [ -n "${{ env.EC2_IP }}" ]; then
+            sed -i "s/YOUR_EC2_IP/${{ env.EC2_IP }}/g" ansible/inventory.ini
+          else
+            echo "EC2 IP not available. Check Terraform output."
+            exit 1
+          fi
       
       - name: Run Ansible playbook
+        if: env.EC2_IP != ''
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/eventify-key.pem
