@@ -1,0 +1,63 @@
+---
+- name: Configure Docker and deploy container
+  hosts: webserver
+  become: yes
+  tasks:
+    - name: Update all packages
+      dnf:
+        name: "*"
+        state: latest
+        update_only: yes
+      
+    - name: Install Docker
+      dnf:
+        name: docker
+        state: present
+    
+    - name: Start Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+    
+    - name: Add ec2-user to docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+    
+    - name: Create app directory
+      file:
+        path: /app
+        state: directory
+        mode: '0755'
+    
+    - name: Copy Dockerfile
+      copy:
+        src: ../docker-app/Dockerfile
+        dest: /app/Dockerfile
+    
+    - name: Create html directory
+      file:
+        path: /app/html
+        state: directory
+        mode: '0755'
+    
+    - name: Copy html files
+      copy:
+        src: ../docker-app/html/
+        dest: /app/html/
+    
+    - name: Build Docker image
+      command: docker build -t webapp /app
+    
+    - name: Stop existing container if running
+      command: docker stop webapp
+      ignore_errors: yes
+    
+    - name: Remove existing container if present
+      command: docker rm webapp
+      ignore_errors: yes
+    
+    - name: Run Docker container
+      command: docker run -d -p 80:80 --name webapp webapp

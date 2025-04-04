@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AWS Container Deployment</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+    h1 { color: #0066cc; }
+    .container { border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
+    .success { color: green; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AWS Container Deployment Success!</h1>
+    <p class="success">✅ Docker container is running successfully</p>
+    <p>This page is being served from a Docker container running on AWS EC2.</p>
+    <p>Current Time: <span id="current-time"></span></p>
+  </div>
+  <script>
+    function updateTime() {
+      document.getElementById('current-time').textContent = new Date().toLocaleString();
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+  </script>
+</body>
+</html>

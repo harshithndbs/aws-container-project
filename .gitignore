@@ -1,0 +1,44 @@
+cat > .gitignore << 'EOF'
+# Terraform files
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/.terraform.lock.hcl
+
+# SSH keys
+*.pem
+*.ppk
+id_rsa*
+*.key
+
+# OS files
+.DS_Store
+Thumbs.db
+._.DS_Store
+._*
+
+# Local environment files
+.env
+.env.*
+.envrc
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Ansible
+*.retry
+
+# Log files
+*.log
+
+# Temporary files
+tmp/
+temp/
+EOF
